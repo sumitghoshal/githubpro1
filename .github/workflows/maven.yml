@@ -1,3 +1,4 @@
+
 name: Java CI/CD Pipeline to Tomcat
 
 on:
@@ -6,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on:  ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       # 1. Checkout code
@@ -61,15 +62,18 @@ jobs:
           fi
           export PATH=$HOME/sonar-scanner-cli/bin:$PATH
           sonar-scanner -v
+      # 7. SonarQube analysis
       - name: SonarQube Analysis
-  env:
-    SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  run: |
-    mvn -U clean verify sonar:sonar \
-      -Dsonar.projectKey=hotstar \
-      -Dsonar.host.url=${SONAR_HOST_URL} \
-      -Dsonar.token=${SONAR_TOKEN}
+        env:
+          SONAR_HOST: ${{ secrets.SONAR_HOST }}
+          SONAR_LOGIN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          echo "SonarQube server URL: $SONAR_HOST"
+          curl -I $SONAR_HOST
+          mvn sonar:sonar \
+            -Dsonar.projectKey=hotstar \
+            -Dsonar.host.url=$SONAR_HOST \
+            -Dsonar.login=$SONAR_LOGIN
 
   deploy:
     runs-on: ubuntu-latest
